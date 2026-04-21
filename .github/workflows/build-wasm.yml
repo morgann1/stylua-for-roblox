@@ -1,0 +1,117 @@
+name: Build StyLua WASM
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Rebuild even if version is unchanged"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    name: Check upstream release
+    runs-on: ubuntu-latest
+    outputs:
+      latest: ${{ steps.latest.outputs.tag }}
+      current: ${{ steps.current.outputs.tag }}
+      should_build: ${{ steps.decide.outputs.should_build }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get latest StyLua release
+        id: latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag=$(gh release view --repo JohnnyMorganz/StyLua --json tagName --jq .tagName)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Latest StyLua release: $tag"
+
+      - name: Read currently built version
+        id: current
+        run: |
+          if [ -f plugin/generated/stylua.version ]; then
+            tag=$(cat plugin/generated/stylua.version)
+          else
+            tag="none"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Currently built version: $tag"
+
+      - name: Decide whether to build
+        id: decide
+        run: |
+          if [ "${{ inputs.force }}" = "true" ]; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            echo "Forced rebuild requested."
+          elif [ "${{ steps.latest.outputs.tag }}" != "${{ steps.current.outputs.tag }}" ]; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            echo "New release detected — will build."
+          else
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+            echo "Already up to date — skipping build."
+          fi
+
+  build:
+    name: Compile WASM and transpile to Luau
+    needs: check
+    if: needs.check.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout StyLua source
+        uses: actions/checkout@v4
+        with:
+          repository: JohnnyMorganz/StyLua
+          ref: ${{ needs.check.outputs.latest }}
+          path: stylua-src
+
+      - name: Install Rust toolchain (with wasm target)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache cargo registry and target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            stylua-src/target
+          key: cargo-${{ runner.os }}-${{ needs.check.outputs.latest }}
+          restore-keys: |
+            cargo-${{ runner.os }}-
+
+      - name: Install Wasynth (wasm2luau)
+        run: cargo install --git https://github.com/Rerumu/Wasynth wasm2luau --locked
+
+      - name: Build StyLua to wasm32
+        working-directory: stylua-src
+        run: cargo build --target wasm32-unknown-unknown --release --features luau
+
+      - name: Transpile WASM to Luau
+        run: |
+          mkdir -p plugin/generated
+          wasm2luau \
+            stylua-src/target/wasm32-unknown-unknown/release/stylua_lib.wasm \
+            > plugin/generated/stylua.luau
+          echo "${{ needs.check.outputs.latest }}" > plugin/generated/stylua.version
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add plugin/generated/stylua.luau plugin/generated/stylua.version
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "build: update StyLua WASM to ${{ needs.check.outputs.latest }}"
+          git push

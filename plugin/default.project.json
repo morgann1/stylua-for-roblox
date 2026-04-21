@@ -1,0 +1,15 @@
+{
+  "name": "StyluaForStudio",
+  "tree": {
+    "$className": "Folder",
+    "Bin": {
+      "$path": "bin/"
+    },
+    "Source": {
+      "$path": "src/"
+    },
+    "Packages": {
+      "$path": "Packages/"
+    }
+  }
+}

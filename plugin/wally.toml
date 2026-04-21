@@ -1,0 +1,9 @@
+[package]
+name = "morgann1/stylua-for-studio"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+private = true
+
+[dependencies]
+SharedToolbar = "morgann1/shared-toolbar@0.2.2"

@@ -20,7 +20,7 @@ jobs:
             current: ${{ steps.current.outputs.tag }}
             should_build: ${{ steps.decide.outputs.should_build }}
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
 
             - name: Get latest StyLua release
               id: latest
@@ -62,19 +62,20 @@ jobs:
         if: needs.check.outputs.should_build == 'true'
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
 
             - name: Checkout StyLua source
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   repository: JohnnyMorganz/StyLua
                   ref: ${{ needs.check.outputs.latest }}
                   path: stylua-src
 
             - name: Install Rust toolchain (with wasm target)
-              uses: dtolnay/rust-toolchain@stable
+              uses: actions-rust-lang/setup-rust-toolchain@v1
               with:
-                  targets: wasm32-unknown-unknown
+                  toolchain: stable
+                  target: wasm32-unknown-unknown
 
             - name: Cache cargo registry and target
               uses: actions/cache@v4

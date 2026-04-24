@@ -97,7 +97,7 @@ jobs:
             - name: Transpile WASM to Luau
               run: |
                   mkdir -p plugin/generated
-                  spider-cli --optimize \
+                  spider-cli \
                     stylua-src/target/wasm32-unknown-unknown/release/stylua_lib.wasm \
                     > plugin/generated/stylua.luau
                   echo "${{ needs.check.outputs.latest }}" > plugin/generated/stylua.version

@@ -76,6 +76,8 @@ jobs:
               with:
                   toolchain: stable
                   target: wasm32-unknown-unknown
+                  cache: false
+                  rustflags: ""
 
             - name: Cache cargo registry and target
               uses: actions/cache@v4

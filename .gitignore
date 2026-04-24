@@ -8,5 +8,6 @@
 sourcemap.json
 
 # Other
-/ref
-/plugin/Packages/
+ref
+plugin/Packages/
+.claude

@@ -16,44 +16,25 @@ jobs:
         name: Check upstream release
         runs-on: ubuntu-latest
         outputs:
-            latest: ${{ steps.latest.outputs.tag }}
-            current: ${{ steps.current.outputs.tag }}
+            latest: ${{ steps.decide.outputs.latest }}
             should_build: ${{ steps.decide.outputs.should_build }}
         steps:
-            - uses: actions/checkout@v6
-
-            - name: Get latest StyLua release
-              id: latest
+            - name: Resolve target version
+              id: decide
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  tag=$(gh release view --repo JohnnyMorganz/StyLua --json tagName --jq .tagName)
-                  echo "tag=$tag" >> "$GITHUB_OUTPUT"
-                  echo "Latest StyLua release: $tag"
-
-            - name: Read currently built version
-              id: current
-              run: |
-                  if [ -f plugin/generated/stylua.version ]; then
-                    tag=$(cat plugin/generated/stylua.version)
-                  else
-                    tag="none"
-                  fi
-                  echo "tag=$tag" >> "$GITHUB_OUTPUT"
-                  echo "Currently built version: $tag"
-
-            - name: Decide whether to build
-              id: decide
-              run: |
-                  if [ "${{ inputs.force }}" = "true" ]; then
+                  latest=$(gh release view --repo JohnnyMorganz/StyLua --json tagName --jq .tagName)
+                  current=$(gh api "repos/${{ github.repository }}/contents/plugin/generated/stylua.version" --jq .content 2>/dev/null | base64 -d 2>/dev/null | tr -d '[:space:]')
+                  [ -z "$current" ] && current="none"
+                  echo "latest=$latest" >> "$GITHUB_OUTPUT"
+                  echo "Latest: $latest, currently built: $current"
+                  if [ "${{ inputs.force }}" = "true" ] || [ "$latest" != "$current" ]; then
                     echo "should_build=true" >> "$GITHUB_OUTPUT"
-                    echo "Forced rebuild requested."
-                  elif [ "${{ steps.latest.outputs.tag }}" != "${{ steps.current.outputs.tag }}" ]; then
-                    echo "should_build=true" >> "$GITHUB_OUTPUT"
-                    echo "New release detected — will build."
+                    echo "Will build."
                   else
                     echo "should_build=false" >> "$GITHUB_OUTPUT"
-                    echo "Already up to date — skipping build."
+                    echo "Already up to date — skipping."
                   fi
 
     build:
@@ -106,13 +87,9 @@ jobs:
                   echo "${{ needs.check.outputs.latest }}" > plugin/generated/stylua.version
 
             - name: Commit and push
-              run: |
-                  git config user.name "github-actions[bot]"
-                  git config user.email "github-actions[bot]@users.noreply.github.com"
-                  git add plugin/generated/stylua.luau plugin/generated/stylua.version
-                  if git diff --cached --quiet; then
-                    echo "No changes to commit."
-                    exit 0
-                  fi
-                  git commit -m "build: update StyLua WASM to ${{ needs.check.outputs.latest }}"
-                  git push
+              uses: stefanzweifel/git-auto-commit-action@v5
+              with:
+                  commit_message: "build: update StyLua WASM to ${{ needs.check.outputs.latest }}"
+                  file_pattern: plugin/generated/stylua.luau plugin/generated/stylua.version
+                  commit_user_name: github-actions[bot]
+                  commit_user_email: github-actions[bot]@users.noreply.github.com

@@ -71,8 +71,8 @@ jobs:
                   restore-keys: |
                       cargo-${{ runner.os }}-
 
-            - name: Install Spider (wasm-to-luau transpiler)
-              run: cargo install --git https://github.com/SovereignSatellite/Spider --locked
+            - name: Install Wasynth (wasm-to-luau transpiler)
+              run: cargo install --git https://github.com/Rerumu/Wasynth --locked --package codegen-luau --bin wasm2luau
 
             - name: Build StyLua to wasm32
               working-directory: stylua-src
@@ -81,7 +81,7 @@ jobs:
             - name: Transpile WASM to Luau
               run: |
                   mkdir -p plugin/generated
-                  spider-cli --optimize \
+                  wasm2luau \
                     stylua-src/target/wasm32-unknown-unknown/release/stylua_lib.wasm \
                     > plugin/generated/stylua.luau
                   echo "${{ needs.check.outputs.latest }}" > plugin/generated/stylua.version

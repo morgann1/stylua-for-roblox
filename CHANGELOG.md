@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-04-25
+
 ### ✨ New
 - Format toolbar button runs StyLua on the active script (or every `LuaSourceContainer` in Selection if there's no active script). Uses `ScriptEditorService:GetEditorSource` / `UpdateSourceAsync` and stamps a `ChangeHistoryService` waypoint so the format is undoable.
 - Settings dock widget with a Rojo-style row layout (bold name, wrapping description, right-aligned control, divider) backed by Foundation. Settings persist to plugin storage and mirror StyLua's Config schema (syntax, column width, indent, quote style, call parentheses, collapse simple statements, block newline gaps, sort requires, space after function names, line endings).

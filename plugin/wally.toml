@@ -1,9 +1,12 @@
 [package]
-name = "morgann1/stylua-for-studio"
+name = "morgann1/stylua-for-roblox"
 version = "0.1.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 private = true
 
 [dependencies]
+React = "jsdotlua/react@17.2.1"
+ReactRoblox = "jsdotlua/react-roblox@17.2.1"
+Charm = "littensy/charm@0.10.0"
 SharedToolbar = "morgann1/shared-toolbar@0.2.2"

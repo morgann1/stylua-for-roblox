@@ -1,5 +1,5 @@
 {
-  "name": "StyluaForStudio",
+  "name": "StyluaForRoblox",
   "tree": {
     "$className": "Folder",
     "Bin": {
@@ -10,6 +10,18 @@
     },
     "Packages": {
       "$path": "Packages/"
+    },
+    "Wasm": {
+      "$path": "wasm/"
+    },
+    "Generated": {
+      "$className": "Folder",
+      "buildConfig": {
+        "$path": "generated/buildConfig.luau"
+      },
+      "changelog": {
+        "$path": "generated/changelog.luau"
+      }
     }
   }
 }

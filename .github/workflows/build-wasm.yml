@@ -83,13 +83,13 @@ jobs:
                   mkdir -p plugin/wasm
                   wasm2luau \
                     stylua-src/target/wasm32-unknown-unknown/release/stylua_lib.wasm \
-                    > plugin/wasm/stylua.luau
+                    > plugin/wasm/StyLua.luau
                   echo "${{ needs.check.outputs.latest }}" > plugin/wasm/stylua.version
 
             - name: Commit and push
               uses: stefanzweifel/git-auto-commit-action@v5
               with:
                   commit_message: "build: update StyLua WASM to ${{ needs.check.outputs.latest }}"
-                  file_pattern: plugin/wasm/stylua.luau plugin/wasm/stylua.version
+                  file_pattern: plugin/wasm/StyLua.luau plugin/wasm/stylua.version
                   commit_user_name: github-actions[bot]
                   commit_user_email: github-actions[bot]@users.noreply.github.com

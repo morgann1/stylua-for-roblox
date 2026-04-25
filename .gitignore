@@ -12,3 +12,6 @@ ref
 plugin/Packages/
 .claude
 plugin/generated/
+
+# Build artifacts
+/*.rbxm

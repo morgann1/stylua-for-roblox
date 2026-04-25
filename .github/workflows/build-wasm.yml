@@ -25,7 +25,7 @@ jobs:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   latest=$(gh release view --repo JohnnyMorganz/StyLua --json tagName --jq .tagName)
-                  current=$(gh api "repos/${{ github.repository }}/contents/plugin/generated/stylua.version" --jq .content 2>/dev/null | base64 -d 2>/dev/null | tr -d '[:space:]')
+                  current=$(gh api "repos/${{ github.repository }}/contents/plugin/wasm/stylua.version" --jq .content 2>/dev/null | base64 -d 2>/dev/null | tr -d '[:space:]')
                   [ -z "$current" ] && current="none"
                   echo "latest=$latest" >> "$GITHUB_OUTPUT"
                   echo "Latest: $latest, currently built: $current"
@@ -80,16 +80,16 @@ jobs:
 
             - name: Transpile WASM to Luau
               run: |
-                  mkdir -p plugin/generated
+                  mkdir -p plugin/wasm
                   wasm2luau \
                     stylua-src/target/wasm32-unknown-unknown/release/stylua_lib.wasm \
-                    > plugin/generated/stylua.luau
-                  echo "${{ needs.check.outputs.latest }}" > plugin/generated/stylua.version
+                    > plugin/wasm/stylua.luau
+                  echo "${{ needs.check.outputs.latest }}" > plugin/wasm/stylua.version
 
             - name: Commit and push
               uses: stefanzweifel/git-auto-commit-action@v5
               with:
                   commit_message: "build: update StyLua WASM to ${{ needs.check.outputs.latest }}"
-                  file_pattern: plugin/generated/stylua.luau plugin/generated/stylua.version
+                  file_pattern: plugin/wasm/stylua.luau plugin/wasm/stylua.version
                   commit_user_name: github-actions[bot]
                   commit_user_email: github-actions[bot]@users.noreply.github.com

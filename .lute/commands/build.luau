@@ -25,7 +25,7 @@ build.arguments = {
 		name = "output",
 		kind = "option",
 		options = {
-			help = "Output file path (default: StudioDiscover.rbxm or StudioDiscover-Dev.rbxm)",
+			help = "Output file path (default: StyluaForRoblox.rbxm or StyluaForRoblox-Dev.rbxm)",
 			aliases = { "o" },
 		},
 	},
@@ -44,8 +44,8 @@ export type Options = {
 	dev: boolean?,
 }
 
-local RELEASE_OUTPUT = "StudioDiscover.rbxm"
-local DEV_OUTPUT = "StudioDiscover-Dev.rbxm"
+local RELEASE_OUTPUT = "StyluaForRoblox.rbxm"
+local DEV_OUTPUT = "StyluaForRoblox-Dev.rbxm"
 
 --[[
 	Builds the plugin.

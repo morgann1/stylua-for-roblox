@@ -26,7 +26,7 @@ local TASK_CREATE_LATEST = `{BASE_URL}/universes/%s/places/%s/luau-execution-ses
 local TASK_CREATE_VERSIONED = `{BASE_URL}/universes/%s/places/%s/versions/%s/luau-execution-session-tasks`
 local BINARY_INPUT_CREATE = `{BASE_URL}/universes/%s/luau-execution-session-task-binary-inputs`
 
-local USER_AGENT = "studio-discover/lute-opencloud-execute 1.0.0"
+local USER_AGENT = "stylua-for-roblox/lute-opencloud-execute 1.0.0"
 local RATE_LIMIT_HEADER = "x-ratelimit-reset"
 local ID_PATTERN = "([%w%-]+)/tasks/([%w%-]+)$"
 

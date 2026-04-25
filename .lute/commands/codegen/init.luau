@@ -56,22 +56,22 @@ local function buildConfig(dev: boolean, version: string, commit: string): { [st
 	-- Embed the version in widget titles so dock state persists per version,
 	-- matching Rojo's convention (e.g. `widget.Title = "Rojo x.y.z"`).
 	local suffix = if dev then " (Dev)" else ""
-	local widgetTitle = `Discover {version}{suffix}`
+	local widgetTitle = `StyLua {version}{suffix}`
 
 	return {
-		pluginName = `Discover{suffix}`,
+		pluginName = `StyLua{suffix}`,
 		widgetId = widgetTitle,
 		widgetTitle = widgetTitle,
 		widgetName = widgetTitle,
-		buttonId = if dev then "discover-dev" else "discover",
-		buttonTitle = `Discover{suffix}`,
+		buttonId = if dev then "stylua-dev" else "stylua",
+		buttonTitle = `StyLua{suffix}`,
 		buttonTooltip = if dev
 			then "Browse and install Luau packages (dev build)"
 			else "Browse and install Luau packages",
-		peerId = if dev then "morgann1/studio-discover-dev" else "morgann1/studio-discover",
-		toolbarTitle = if dev then "22:43 (Dev)" else "22:43",
-		mediumName = if dev then "  22:43 Plugin Suite (Dev)" else "  22:43 Plugin Suite",
-		icon = if dev then "rbxassetid://132814924850541" else "rbxassetid://125842588490194",
+		peerId = if dev then "morgann1/stylua-for-roblox-dev" else "morgann1/stylua-for-roblox",
+		toolbarTitle = if dev then "22:43 | StyLua (Dev)" else "22:43 | StyLua",
+		mediumName = if dev then "  22:43 Plugin Suite | StyLua (Dev)" else "  22:43 Plugin Suite | StyLua",
+		icon = if dev then "" else "",
 		commit = commit,
 	}
 end

@@ -7,7 +7,7 @@
 ]]
 
 local PLUGIN_ID = 91442200339606
-local PLUGIN_NAME = "Discover"
+local PLUGIN_NAME = "StyLua"
 local PLUGIN_DESCRIPTION = "Browse and install Luau packages from Wally and pesde directly from Roblox Studio."
 local PLUGIN_CREATOR_ID = 48044582
 local PLUGIN_CREATOR_TYPE = Enum.AssetCreatorType.User

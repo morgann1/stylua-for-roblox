@@ -2,7 +2,9 @@
 
 local StyluaForRoblox = script:FindFirstAncestor("StyluaForRoblox")
 
+local Foundation = require(StyluaForRoblox.Packages.Foundation)
 local React = require(StyluaForRoblox.Packages.React)
+local SettingsScreen = require(StyluaForRoblox.Source.Settings.SettingsScreen)
 
 local e = React.createElement
 
@@ -11,19 +13,11 @@ export type Props = {
 	overlayGui: DockWidgetPluginGui,
 }
 
-local function App(_props: Props)
-	return e("Frame", {
-		Size = UDim2.fromScale(1, 1),
-		BackgroundTransparency = 1,
+local function App(props: Props)
+	return e(Foundation.FoundationProvider, {
+		overlayGui = props.overlayGui,
 	}, {
-		Label = e("TextLabel", {
-			Size = UDim2.fromScale(1, 1),
-			BackgroundTransparency = 1,
-			Text = "StyLua for Roblox",
-			TextScaled = true,
-			Font = Enum.Font.GothamMedium,
-			TextColor3 = Color3.fromRGB(220, 220, 220),
-		}),
+		SettingsScreen = e(SettingsScreen),
 	})
 end
 

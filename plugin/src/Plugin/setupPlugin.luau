@@ -5,11 +5,12 @@ local StudioService = game:GetService("StudioService")
 
 local StyluaForRoblox = script:FindFirstAncestor("StyluaForRoblox")
 
+local buildConfig = require(StyluaForRoblox.Generated.buildConfig)
+local mountApp = require(StyluaForRoblox.Source.Plugin.mountApp)
 local PluginStore = require(StyluaForRoblox.Source.Plugin.PluginStore)
 local SharedToolbar = require(StyluaForRoblox.Packages.SharedToolbar)
-local buildConfig = require(StyluaForRoblox.Generated.buildConfig)
 
-local WIDGET_INFO = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, false, true, 936, 702, 306, 306)
+local WIDGET_INFO = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, false, true, 320, 210, 300, 210)
 
 local function setupPlugin(plugin: Plugin): ()
 	if RunService:IsRunning() then
@@ -36,7 +37,6 @@ local function setupPlugin(plugin: Plugin): ()
 		if destroyApp ~= nil then
 			return
 		end
-		local mountApp = require(StyluaForRoblox.Source.Plugin.mountApp)
 		destroyApp = mountApp(plugin, widget)
 	end
 
@@ -56,7 +56,6 @@ local function setupPlugin(plugin: Plugin): ()
 				iconId = "rbxassetid://100834953677262",
 				clickableWhenViewportHidden = false,
 				onClick = function()
-					-- TODO: read StudioService.ActiveScript, run StyLua, write back
 					warn("[StyLua] Format Document not yet implemented")
 				end,
 			},

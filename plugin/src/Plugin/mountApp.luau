@@ -2,10 +2,9 @@
 
 local StyluaForRoblox = script:FindFirstAncestor("StyluaForRoblox")
 
+local App = require(StyluaForRoblox.Source.App)
 local React = require(StyluaForRoblox.Packages.React)
 local ReactRoblox = require(StyluaForRoblox.Packages.ReactRoblox)
-
-local App = require(StyluaForRoblox.Source.App)
 
 local e = React.createElement
 

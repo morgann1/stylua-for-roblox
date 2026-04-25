@@ -39,7 +39,12 @@ export type Options = {
 local ANALYZE_PATHS = { ".lute", "plugin/bin", "plugin/src" }
 
 -- Patterns to ignore in luau-lsp
-local IGNORE_PATTERNS = { "plugin/Packages/**", "**/.lute/typedefs/**" }
+local IGNORE_PATTERNS = {
+	"plugin/Packages/**",
+	"plugin/generated/**",
+	"plugin/wasm/**",
+	"**/.lute/typedefs/**",
+}
 
 local function isDir(path: string): boolean
 	return fs.exists(path) and fs.type(path) == "dir"

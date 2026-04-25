@@ -1,112 +1,143 @@
 name: Build StyLua WASM
 
 on:
-    schedule:
-        - cron: "0 */6 * * *"
-    workflow_dispatch:
-        inputs:
-            force:
-                description: "Rebuild even if version is unchanged"
-                type: boolean
-                default: false
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Rebuild even if version is unchanged"
+        type: boolean
+        default: false
 
 permissions:
-    contents: write
+  contents: write
+  pull-requests: write
 
 jobs:
-    check:
-        name: Check upstream release
-        runs-on: ubuntu-latest
-        outputs:
-            latest: ${{ steps.decide.outputs.latest }}
-            should_build: ${{ steps.decide.outputs.should_build }}
-        steps:
-            - uses: actions/checkout@v6
+  check:
+    name: Check upstream release
+    runs-on: ubuntu-latest
+    outputs:
+      latest: ${{ steps.decide.outputs.latest }}
+      current: ${{ steps.decide.outputs.current }}
+      should_build: ${{ steps.decide.outputs.should_build }}
+    steps:
+      - uses: actions/checkout@v6
 
-            - name: Resolve target version
-              id: decide
-              env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: |
-                  latest=$(gh release view --repo JohnnyMorganz/StyLua --json tagName --jq .tagName)
-                  current=$(gh api "repos/${{ github.repository }}/contents/plugin/wasm/stylua.version" --jq .content 2>/dev/null | base64 -d 2>/dev/null | tr -d '[:space:]')
-                  [ -z "$current" ] && current="none"
-                  echo "latest=$latest" >> "$GITHUB_OUTPUT"
-                  echo "Latest: $latest, currently built: $current"
-                  if [ "${{ inputs.force }}" = "true" ] || [ "$latest" != "$current" ]; then
-                    echo "should_build=true" >> "$GITHUB_OUTPUT"
-                    echo "Will build."
-                  else
-                    echo "should_build=false" >> "$GITHUB_OUTPUT"
-                    echo "Already up to date — skipping."
-                  fi
+      - name: Resolve target version
+        id: decide
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          latest=$(gh release view --repo JohnnyMorganz/StyLua --json tagName --jq .tagName)
+          current=$(gh api "repos/${{ github.repository }}/contents/plugin/wasm/stylua.version" --jq .content 2>/dev/null | base64 -d 2>/dev/null | tr -d '[:space:]')
+          [ -z "$current" ] && current="none"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "Latest: $latest, currently built: $current"
+          if [ "${{ inputs.force }}" = "true" ] || [ "$latest" != "$current" ]; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            echo "Will build."
+          else
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+            echo "Already up to date — skipping."
+          fi
 
-            - uses: CompeyDev/setup-rokit@v0.1.2
+      - uses: CompeyDev/setup-rokit@v0.1.2
 
-            - name: Stamp README with last-checked timestamp
-              run: lute run stamp-readme --version "${{ steps.decide.outputs.latest }}"
+      - name: Stamp README with last-checked timestamp
+        run: lute run stamp-readme --version "${{ steps.decide.outputs.latest }}"
 
-            - name: Commit README stamp
-              uses: stefanzweifel/git-auto-commit-action@v7
-              with:
-                  commit_message: "chore: refresh upstream-check timestamp"
-                  file_pattern: README.md
-                  commit_user_name: github-actions[bot]
-                  commit_user_email: github-actions[bot]@users.noreply.github.com
+      - name: Commit README stamp
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: refresh upstream-check timestamp"
+          file_pattern: README.md
+          commit_user_name: github-actions[bot]
+          commit_user_email: github-actions[bot]@users.noreply.github.com
 
-    build:
-        name: Compile WASM and transpile to Luau
-        needs: check
-        if: needs.check.outputs.should_build == 'true'
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v6
+  build:
+    name: Compile WASM and transpile to Luau
+    needs: check
+    if: needs.check.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
 
-            - name: Checkout StyLua source
-              uses: actions/checkout@v6
-              with:
-                  repository: JohnnyMorganz/StyLua
-                  ref: ${{ needs.check.outputs.latest }}
-                  path: stylua-src
+      - name: Checkout StyLua source
+        uses: actions/checkout@v6
+        with:
+          repository: JohnnyMorganz/StyLua
+          ref: ${{ needs.check.outputs.latest }}
+          path: stylua-src
 
-            - name: Install Rust toolchain (with wasm target)
-              uses: actions-rust-lang/setup-rust-toolchain@v1
-              with:
-                  toolchain: stable
-                  target: wasm32-unknown-unknown
-                  cache: false
-                  rustflags: ""
+      - name: Install Rust toolchain (with wasm target)
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          cache: false
+          rustflags: ""
 
-            - name: Cache cargo registry and target
-              uses: actions/cache@v4
-              with:
-                  path: |
-                      ~/.cargo/registry
-                      ~/.cargo/git
-                      stylua-src/target
-                  key: cargo-${{ runner.os }}-${{ needs.check.outputs.latest }}
-                  restore-keys: |
-                      cargo-${{ runner.os }}-
+      - name: Cache cargo registry and target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            stylua-src/target
+          key: cargo-${{ runner.os }}-${{ needs.check.outputs.latest }}
+          restore-keys: |
+            cargo-${{ runner.os }}-
 
-            - name: Install Wasynth (wasm-to-luau transpiler)
-              run: cargo install --git https://github.com/Rerumu/Wasynth --locked --bin wasm2luau codegen-luau
+      - name: Install Wasynth (wasm-to-luau transpiler)
+        run: cargo install --git https://github.com/Rerumu/Wasynth --locked --bin
+          wasm2luau codegen-luau
 
-            - name: Build StyLua to wasm32
-              working-directory: stylua-src
-              run: cargo build --target wasm32-unknown-unknown --release --features lua52,lua53,lua54,luajit,luau,cfxlua
+      - name: Build StyLua to wasm32
+        working-directory: stylua-src
+        run: cargo build --target wasm32-unknown-unknown --release --features
+          lua52,lua53,lua54,luajit,luau,cfxlua
 
-            - name: Transpile WASM to Luau
-              run: |
-                  mkdir -p plugin/wasm
-                  wasm2luau \
-                    stylua-src/target/wasm32-unknown-unknown/release/stylua_lib.wasm \
-                    > plugin/wasm/StyLua.luau
-                  echo "${{ needs.check.outputs.latest }}" > plugin/wasm/stylua.version
+      - name: Transpile WASM to Luau
+        run: |
+          mkdir -p plugin/wasm
+          wasm2luau \
+            stylua-src/target/wasm32-unknown-unknown/release/stylua_lib.wasm \
+            > plugin/wasm/StyLua.luau
+          echo "${{ needs.check.outputs.latest }}" > plugin/wasm/stylua.version
 
-            - name: Commit and push
-              uses: stefanzweifel/git-auto-commit-action@v7
-              with:
-                  commit_message: "build: update StyLua WASM to ${{ needs.check.outputs.latest }}"
-                  file_pattern: plugin/wasm/StyLua.luau plugin/wasm/stylua.version
-                  commit_user_name: github-actions[bot]
-                  commit_user_email: github-actions[bot]@users.noreply.github.com
+      - uses: CompeyDev/setup-rokit@v0.1.2
+
+      - name: Bump plugin version + CHANGELOG
+        id: bump
+        if: needs.check.outputs.current != 'none'
+        run: |
+          NEW=$(lute run bump-stylua-version \
+            --from "${{ needs.check.outputs.current }}" \
+            --to "${{ needs.check.outputs.latest }}")
+          echo "version=$NEW" >> "$GITHUB_OUTPUT"
+
+      - name: Open pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: deps/stylua-${{ needs.check.outputs.latest }}
+          delete-branch: true
+          title: "build: update StyLua WASM to ${{ needs.check.outputs.latest }}"
+          commit-message: |
+            build: update StyLua WASM to ${{ needs.check.outputs.latest }}
+
+            Auto-generated by build-wasm.yml. StyLua
+            ${{ needs.check.outputs.current }} → ${{ needs.check.outputs.latest }}
+            ${{ steps.bump.outputs.version && format('bumps the plugin to v{0}.', steps.bump.outputs.version) || '' }}
+          body: |
+            Auto-generated PR from upstream StyLua bump.
+
+            - StyLua: `${{ needs.check.outputs.current }}` → `${{ needs.check.outputs.latest }}`
+            ${{ steps.bump.outputs.version && format('- Plugin: → `v{0}`', steps.bump.outputs.version) || '- Plugin version unchanged (no prior wasm.version on file).' }}
+
+            Review the formatted output against your scripts before merging — this is not a strict format-compatible bump.
+          labels: dependencies, chore
+          committer: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>

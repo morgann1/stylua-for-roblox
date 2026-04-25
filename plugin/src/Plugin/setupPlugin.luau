@@ -6,6 +6,7 @@ local StudioService = game:GetService("StudioService")
 local StyluaForRoblox = script:FindFirstAncestor("StyluaForRoblox")
 
 local buildConfig = require(StyluaForRoblox.Generated.buildConfig)
+local formatAsync = require(StyluaForRoblox.Source.Format)
 local mountApp = require(StyluaForRoblox.Source.Plugin.mountApp)
 local PluginStore = require(StyluaForRoblox.Source.Plugin.PluginStore)
 local SharedToolbar = require(StyluaForRoblox.Packages.SharedToolbar)
@@ -54,9 +55,9 @@ local function setupPlugin(plugin: Plugin): ()
 				title = "Format",
 				tooltip = "Format the active script with StyLua",
 				iconId = "rbxassetid://100834953677262",
-				clickableWhenViewportHidden = false,
+				clickableWhenViewportHidden = true,
 				onClick = function()
-					warn("[StyLua] Format Document not yet implemented")
+					formatAsync()
 				end,
 			},
 			{

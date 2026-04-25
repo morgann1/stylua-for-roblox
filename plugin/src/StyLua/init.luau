@@ -97,7 +97,7 @@ export type IndentType = "Tabs" | "Spaces"
 export type LineEndings = "Unix" | "Windows"
 export type QuoteStyle = "AutoPreferDouble" | "AutoPreferSingle" | "ForceDouble" | "ForceSingle"
 export type CallParentheses = "Always" | "NoSingleString" | "NoSingleTable" | "None" | "Input"
-export type LuaVersion = "Lua51" | "Lua52" | "Lua53" | "Lua54" | "LuaJIT" | "Luau" | "CfxLua"
+export type LuaVersion = "All" | "Lua51" | "Lua52" | "Lua53" | "Lua54" | "LuaJIT" | "Luau" | "CfxLua"
 export type CollapseSimpleStatement = "Never" | "FunctionOnly" | "ConditionalOnly" | "Always"
 
 export type Config = {
@@ -136,13 +136,14 @@ local COLLAPSE_SIMPLE_STATEMENT: { [CollapseSimpleStatement]: number } = {
 	Always = 3,
 }
 local LUA_VERSION: { [LuaVersion]: number } = {
-	Lua51 = 0,
-	Lua52 = 1,
-	Lua53 = 2,
-	Lua54 = 3,
-	LuaJIT = 4,
+	All = 0,
+	Lua51 = 1,
+	Lua52 = 2,
+	Lua53 = 3,
+	Lua54 = 4,
 	Luau = 5,
-	CfxLua = 6,
+	LuaJIT = 6,
+	CfxLua = 7,
 }
 
 local function newConfig(options: Config?): number
@@ -177,7 +178,9 @@ local function newConfig(options: Config?): number
 		f.__wbg_set_config_space_after_function_names(handle, options.spaceAfterFunctionNames)
 	end
 	if options.sortRequires ~= nil then
-		f.__wbg_set_config_sort_requires(handle, if options.sortRequires then 1 else 0)
+		local sortHandle = f.sortrequiresconfig_new()
+		f.sortrequiresconfig_set_enabled(sortHandle, if options.sortRequires then 1 else 0)
+		f.__wbg_set_config_sort_requires(handle, sortHandle)
 	end
 	if options.blockNewlineGaps ~= nil then
 		f.__wbg_set_config_block_newline_gaps(handle, if options.blockNewlineGaps then 1 else 0)
@@ -199,13 +202,10 @@ local function format(source: string, options: (Config | number)?): string
 	local rt = getInstance().rt
 
 	local configHandle: number
-	local ownsConfig: boolean
 	if typeof(options) == "number" then
 		configHandle = options
-		ownsConfig = false
 	else
 		configHandle = newConfig(options)
-		ownsConfig = true
 	end
 
 	local retptr = malloc(16, 4)
@@ -226,9 +226,6 @@ local function format(source: string, options: (Config | number)?): string
 		free(dataPtr, dataLen, 1)
 	end
 	free(retptr, 16, 4)
-	if ownsConfig then
-		freeConfig(configHandle)
-	end
 
 	if isErr ~= 0 then
 		error(`[StyLua] format error: {data}`)

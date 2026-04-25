@@ -72,7 +72,7 @@ jobs:
                       cargo-${{ runner.os }}-
 
             - name: Install Wasynth (wasm-to-luau transpiler)
-              run: cargo install --git https://github.com/Rerumu/Wasynth --locked --package codegen-luau --bin wasm2luau
+              run: cargo install --git https://github.com/Rerumu/Wasynth --locked --bin wasm2luau codegen-luau
 
             - name: Build StyLua to wasm32
               working-directory: stylua-src

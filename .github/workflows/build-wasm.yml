@@ -47,7 +47,7 @@ jobs:
               run: lute run stamp-readme --version "${{ steps.decide.outputs.latest }}"
 
             - name: Commit README stamp
-              uses: stefanzweifel/git-auto-commit-action@v5
+              uses: stefanzweifel/git-auto-commit-action@v7
               with:
                   commit_message: "chore: refresh upstream-check timestamp"
                   file_pattern: README.md
@@ -104,7 +104,7 @@ jobs:
                   echo "${{ needs.check.outputs.latest }}" > plugin/wasm/stylua.version
 
             - name: Commit and push
-              uses: stefanzweifel/git-auto-commit-action@v5
+              uses: stefanzweifel/git-auto-commit-action@v7
               with:
                   commit_message: "build: update StyLua WASM to ${{ needs.check.outputs.latest }}"
                   file_pattern: plugin/wasm/StyLua.luau plugin/wasm/stylua.version

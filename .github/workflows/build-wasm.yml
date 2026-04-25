@@ -1,6 +1,8 @@
 name: Build StyLua WASM
 
 on:
+    schedule:
+        - cron: "0 */6 * * *"
     workflow_dispatch:
         inputs:
             force:
@@ -19,6 +21,8 @@ jobs:
             latest: ${{ steps.decide.outputs.latest }}
             should_build: ${{ steps.decide.outputs.should_build }}
         steps:
+            - uses: actions/checkout@v6
+
             - name: Resolve target version
               id: decide
               env:
@@ -36,6 +40,19 @@ jobs:
                     echo "should_build=false" >> "$GITHUB_OUTPUT"
                     echo "Already up to date — skipping."
                   fi
+
+            - uses: CompeyDev/setup-rokit@v0.1.2
+
+            - name: Stamp README with last-checked timestamp
+              run: lute run stamp-readme --version "${{ steps.decide.outputs.latest }}"
+
+            - name: Commit README stamp
+              uses: stefanzweifel/git-auto-commit-action@v5
+              with:
+                  commit_message: "chore: refresh upstream-check timestamp"
+                  file_pattern: README.md
+                  commit_user_name: github-actions[bot]
+                  commit_user_email: github-actions[bot]@users.noreply.github.com
 
     build:
         name: Compile WASM and transpile to Luau

@@ -1,0 +1,105 @@
+name: Test Spider Transpiler
+
+on:
+  workflow_dispatch:
+    inputs:
+      stylua_version:
+        description: "StyLua tag to transpile (defaults to latest release)"
+        type: string
+        default: ""
+      spider_ref:
+        description: "Spider git ref (branch, tag, or SHA)"
+        type: string
+        default: "trunk"
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Try Spider on StyLua WASM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Resolve target StyLua version
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          target="${{ inputs.stylua_version }}"
+          if [ -z "$target" ]; then
+            target=$(gh release view --repo JohnnyMorganz/StyLua --json tagName --jq .tagName)
+          fi
+          echo "target=$target" >> "$GITHUB_OUTPUT"
+          echo "Targeting StyLua $target"
+
+      - name: Checkout StyLua source
+        uses: actions/checkout@v6
+        with:
+          repository: JohnnyMorganz/StyLua
+          ref: ${{ steps.resolve.outputs.target }}
+          path: stylua-src
+
+      - name: Checkout Spider source
+        uses: actions/checkout@v6
+        with:
+          repository: SovereignSatellite/Spider
+          ref: ${{ inputs.spider_ref }}
+          submodules: recursive
+          path: spider-src
+
+      - name: Resolve Spider commit
+        id: spider
+        working-directory: spider-src
+        run: echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Install Rust toolchain (with wasm target)
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          cache: false
+          rustflags: ""
+
+      - name: Cache cargo registry and build dirs
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            stylua-src/target
+            spider-src/target
+          key: cargo-spider-${{ runner.os }}-${{ steps.resolve.outputs.target }}-${{ steps.spider.outputs.sha }}
+          restore-keys: |
+            cargo-spider-${{ runner.os }}-
+
+      - name: Build StyLua to wasm32
+        working-directory: stylua-src
+        run: cargo build --target wasm32-unknown-unknown --release --features
+          lua52,lua53,lua54,luajit,luau,cfxlua
+
+      - name: Build Spider CLI
+        working-directory: spider-src
+        run: cargo build --release --package spider-cli
+
+      - name: Transpile WASM to Luau with Spider
+        run: |
+          mkdir -p plugin/wasm-spider
+          ./spider-src/target/release/spider-cli \
+            --source web-assembly \
+            --target luau \
+            --should-optimize \
+            stylua-src/target/wasm32-unknown-unknown/release/stylua_lib.wasm \
+            > plugin/wasm-spider/StyLua.luau
+          echo "${{ steps.resolve.outputs.target }}" > plugin/wasm-spider/stylua.version
+          echo "${{ steps.spider.outputs.sha }}" > plugin/wasm-spider/spider.version
+
+      - name: Commit Spider output
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: |
+            test(spider): transpile StyLua ${{ steps.resolve.outputs.target }} via Spider ${{ steps.spider.outputs.sha }}
+          file_pattern: plugin/wasm-spider/**
+          commit_user_name: github-actions[bot]
+          commit_user_email: github-actions[bot]@users.noreply.github.com

@@ -17,9 +17,9 @@ StyLua's Rust crate gets compiled to WebAssembly, and the WASM gets transpiled t
 
 ## Motivation
 
-Existing in-Studio StyLua plugins want a Node.js sidecar running alongside Studio that proxies HTTP requests to the StyLua CLI binary. So you install Node, install StyLua, and start the sidecar before every Studio session. The plugin also only formats while the sidecar is alive. Folding the formatter into the plugin removes all of that. The WASM-transpiled StyLua ships inside the `.rbxm`, so install is one click and there's no second process to keep running.
+Existing in-Studio StyLua plugins need a Node.js sidecar running alongside Studio that proxies HTTP requests to the StyLua CLI binary. So you install Node, install StyLua, and start the sidecar before every Studio session. The plugin also only formats while the sidecar is alive. Folding the formatter into the plugin removes all of that. The WASM-transpiled StyLua ships inside the `.rbxm`, so install is one click and there's no second process to keep running.
 
-The other thing is staying current. StyLua ships frequent releases, and any drift between the version embedded in the plugin and upstream is a behavior bug from the user's perspective. A scheduled GitHub workflow checks `JohnnyMorganz/StyLua` every 6 hours and opens a PR when a new tag lands, with the regenerated `plugin/wasm/StyLua.luau`, an updated `stylua.version`, a semver-passthrough bump in `plugin/wally.toml`, and a fresh `CHANGELOG.md` section. Review, merge, tag, ship.
+Staying current is the other half. StyLua ships frequent releases, and any drift between the version embedded in the plugin and upstream is a behavior bug from the user's perspective. A scheduled GitHub workflow checks `JohnnyMorganz/StyLua` every 6 hours and opens a PR when a new tag lands, with the regenerated `plugin/wasm/StyLua.luau`, an updated `stylua.version`, a semver-passthrough bump in `plugin/wally.toml`, and a fresh `CHANGELOG.md` section. From there it's a normal review, merge, tag, and ship.
 
 ## Usage
 

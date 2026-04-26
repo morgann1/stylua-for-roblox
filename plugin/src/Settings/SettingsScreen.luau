@@ -108,6 +108,7 @@ local function SettingRow(props: {
 			LayoutOrder = 0,
 			layout = {
 				FillDirection = Enum.FillDirection.Horizontal,
+				HorizontalFlex = Enum.UIFlexAlignment.SpaceBetween,
 				Padding = CONTROL_GAP,
 				SortOrder = Enum.SortOrder.LayoutOrder,
 				VerticalAlignment = Enum.VerticalAlignment.Center,
@@ -118,7 +119,7 @@ local function SettingRow(props: {
 				AutomaticSize = Enum.AutomaticSize.Y,
 				LayoutOrder = 0,
 				flexItem = {
-					FlexMode = Enum.UIFlexMode.Fill,
+					FlexMode = Enum.UIFlexMode.Shrink,
 				},
 				layout = {
 					FillDirection = Enum.FillDirection.Vertical,
@@ -141,7 +142,12 @@ local function SettingRow(props: {
 					LayoutOrder = 1,
 				}),
 			}),
-			Control = props.control,
+			Control = e(Foundation.View, {
+				AutomaticSize = Enum.AutomaticSize.XY,
+				LayoutOrder = 1,
+			}, {
+				Inner = props.control,
+			}),
 		}),
 		Divider = e(Foundation.Divider, {
 			LayoutOrder = 1,
@@ -158,7 +164,8 @@ local function SettingsScreen()
 		scroll = {
 			ScrollingDirection = Enum.ScrollingDirection.Y,
 			AutomaticCanvasSize = Enum.AutomaticSize.Y,
-			VerticalScrollBarInset = Enum.ScrollBarInset.Always,
+			VerticalScrollBarInset = Enum.ScrollBarInset.None,
+			scrollBarVisibility = "None",
 		},
 		layout = {
 			FillDirection = Enum.FillDirection.Vertical,
@@ -198,6 +205,7 @@ local function SettingsScreen()
 				maximum = 240,
 				step = 1,
 				precision = 0,
+				size = "Medium",
 				width = UDim.new(0, CONTROL_WIDTH),
 				onChanged = function(value: number)
 					Settings.update({ columnWidth = value })
@@ -242,6 +250,7 @@ local function SettingsScreen()
 				maximum = 16,
 				step = 1,
 				precision = 0,
+				size = "Medium",
 				width = UDim.new(0, CONTROL_WIDTH),
 				onChanged = function(value: number)
 					Settings.update({ indentWidth = value })

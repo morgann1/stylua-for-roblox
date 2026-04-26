@@ -5,13 +5,32 @@ local StudioService = game:GetService("StudioService")
 
 local StyluaForRoblox = script:FindFirstAncestor("StyluaForRoblox")
 
+local DoCleanup = require(StyluaForRoblox.Packages.DoCleanup)
+local Interposer = require(StyluaForRoblox.Packages.Interposer)
+local Leader = require(StyluaForRoblox.Packages.Leader)
+local SharedToolbar = require(StyluaForRoblox.Packages.SharedToolbar)
 local buildConfig = require(StyluaForRoblox.Generated.buildConfig)
 local formatAsync = require(StyluaForRoblox.Source.Format)
 local mountApp = require(StyluaForRoblox.Source.Plugin.mountApp)
 local PluginStore = require(StyluaForRoblox.Source.Plugin.PluginStore)
-local SharedToolbar = require(StyluaForRoblox.Packages.SharedToolbar)
 
 local WIDGET_INFO = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, false, true, 320, 210, 300, 210)
+
+local PROTOCOL_NAMESPACE = "@morgann1/stylua-for-roblox"
+local TOOLBAR_ID = "stylua-for-roblox"
+
+local function iconRamp(variants: { light: string, dark: string, mono: string })
+	return {
+		{
+			size = 64,
+			variants = {
+				light = variants.light,
+				dark = variants.dark,
+				mono = variants.mono,
+			} :: { ["light" | "dark" | "mono"]: string },
+		},
+	}
+end
 
 local function setupPlugin(plugin: Plugin): ()
 	if RunService:IsRunning() then
@@ -44,50 +63,80 @@ local function setupPlugin(plugin: Plugin): ()
 	local settingsButtonId = `{buildConfig.buttonId}-settings`
 	local formatButtonId = `{buildConfig.buttonId}-format`
 
-	local handle = SharedToolbar.register({
-		plugin = plugin,
-		mediumName = buildConfig.mediumName,
-		toolbarTitle = buildConfig.toolbarTitle,
-		peerId = buildConfig.peerId,
-		buttons = {
-			{
-				id = formatButtonId,
-				title = "Format",
-				tooltip = "Format the active script with StyLua",
-				iconId = "rbxassetid://100834953677262",
+	local scope: { unknown } = {}
+
+	local interposer = Interposer.logon(buildConfig.mediumName, buildConfig.mediumName, scope)
+	local leader = Leader.track(scope, interposer)
+
+	local toolbar = SharedToolbar.connect(
+		scope,
+		plugin,
+		buildConfig.mediumName,
+		interposer,
+		leader,
+		PROTOCOL_NAMESPACE,
+		TOOLBAR_ID,
+		buildConfig.toolbarTitle,
+		buildConfig.peerId,
+		{
+			[formatButtonId] = {
+				displayName = "Format",
+				toolTip = "Format the active script with StyLua",
+				iconRamp = iconRamp({
+					light = "rbxassetid://114496818486448",
+					dark = "rbxassetid://139507476070594",
+					mono = "rbxassetid://88819650709811",
+				}),
 				clickableWhenViewportHidden = true,
-				onClick = function()
-					formatAsync()
-				end,
+				creationOrder = 0,
 			},
-			{
-				id = settingsButtonId,
-				title = "Settings",
-				tooltip = "Open StyLua settings",
-				iconId = "rbxassetid://78359725093269",
+			[settingsButtonId] = {
+				displayName = "Settings",
+				toolTip = "Open StyLua settings",
+				iconRamp = iconRamp({
+					light = "rbxassetid://133638526545460",
+					dark = "rbxassetid://73058425827242",
+					mono = "rbxassetid://112604258400921",
+				}),
 				clickableWhenViewportHidden = true,
-				onClick = function()
-					widget.Enabled = not widget.Enabled
-				end,
+				creationOrder = 1,
 			},
 		},
-	})
+		{}
+	)
+
+	table.insert(
+		scope,
+		toolbar.onClick(function(buttonId: string)
+			if buttonId == formatButtonId then
+				formatAsync()
+			elseif buttonId == settingsButtonId then
+				widget.Enabled = not widget.Enabled
+			end
+		end)
+	)
+
+	local function setActiveIfLeader(isActive: boolean)
+		if leader.selfIsLeader() == true then
+			toolbar.setActive(settingsButtonId, isActive)
+		end
+	end
 
 	local enabledConn = widget:GetPropertyChangedSignal("Enabled"):Connect(function()
-		handle:setActive(settingsButtonId, widget.Enabled)
+		setActiveIfLeader(widget.Enabled)
 		if widget.Enabled then
 			mount()
 		end
 	end)
 
 	if widget.Enabled then
-		handle:setActive(settingsButtonId, true)
+		setActiveIfLeader(true)
 		mount()
 	end
 
 	plugin.Unloading:Connect(function()
 		enabledConn:Disconnect()
-		handle:destroy()
+		DoCleanup(scope)
 		if destroyApp ~= nil then
 			destroyApp()
 			destroyApp = nil

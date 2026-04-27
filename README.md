@@ -8,7 +8,7 @@
 In-process [StyLua](https://github.com/JohnnyMorganz/StyLua) for Roblox Studio. No companion server, no CLI binary, no `HttpService` round-trip.
 
 <!-- LAST_CHECKED:START -->
-_Last checked against upstream: 2026-04-27 12:39 UTC (StyLua v2.4.1)_
+_Last checked against upstream: 2026-04-27 18:33 UTC (StyLua v2.4.1)_
 <!-- LAST_CHECKED:END -->
 
 ## Overview

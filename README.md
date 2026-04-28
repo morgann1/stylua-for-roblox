@@ -1,4 +1,4 @@
-# StyLua for Studio
+# StyLua for Roblox Studio
 
 [![Build WASM](https://github.com/morgann1/stylua-for-roblox/actions/workflows/build-wasm.yml/badge.svg)](https://github.com/morgann1/stylua-for-roblox/actions/workflows/build-wasm.yml)
 [![Release](https://github.com/morgann1/stylua-for-roblox/actions/workflows/release.yml/badge.svg)](https://github.com/morgann1/stylua-for-roblox/actions/workflows/release.yml)

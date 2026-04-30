@@ -86,10 +86,10 @@ jobs:
       - name: Transpile WASM to Luau with Spider
         run: |
           mkdir -p plugin/wasm-spider
-          ./spider-src/target/release/spider-cli \
+          ./spider-src/target/release/spider-cli compile \
             --source web-assembly \
             --target luau \
-            --should-optimize \
+            --optimize \
             stylua-src/target/wasm32-unknown-unknown/release/stylua_lib.wasm \
             > plugin/wasm-spider/StyLua.luau
           echo "${{ steps.resolve.outputs.target }}" > plugin/wasm-spider/stylua.version

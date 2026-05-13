@@ -6,5 +6,5 @@
 [![License: MPL-2.0](https://img.shields.io/badge/license-MPL--2.0-blue)](LICENSE)
 
 <!-- LAST_CHECKED:START -->
-_Last checked against upstream: 2026-05-12 01:06 UTC (StyLua v2.4.1)_
+_Last checked against upstream: 2026-05-13 01:11 UTC (StyLua v2.4.1)_
 <!-- LAST_CHECKED:END -->

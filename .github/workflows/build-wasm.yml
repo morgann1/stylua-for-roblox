@@ -44,7 +44,7 @@ jobs:
             echo "Already up to date — skipping."
           fi
 
-      - uses: CompeyDev/setup-rokit@v0.1.2
+      - uses: CompeyDev/setup-rokit@v0.2.1
 
       - name: Stamp README with last-checked timestamp
         run: lute run stamp-readme --version "${{ steps.decide.outputs.latest }}"
@@ -108,7 +108,7 @@ jobs:
             > plugin/wasm/StyLua.luau
           echo "${{ needs.check.outputs.latest }}" > plugin/wasm/stylua.version
 
-      - uses: CompeyDev/setup-rokit@v0.1.2
+      - uses: CompeyDev/setup-rokit@v0.2.1
 
       - name: Bump plugin version + CHANGELOG
         id: bump

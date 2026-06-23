@@ -46,7 +46,6 @@ jobs:
         with:
           repository: SovereignSatellite/Spider
           ref: ${{ inputs.spider_ref }}
-          submodules: recursive
           path: spider-src
 
       - name: Resolve Spider commit

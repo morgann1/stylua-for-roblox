@@ -20,7 +20,7 @@ jobs:
     name: Try Spider on StyLua WASM
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Resolve target StyLua version
         id: resolve
@@ -35,14 +35,14 @@ jobs:
           echo "Targeting StyLua $target"
 
       - name: Checkout StyLua source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: JohnnyMorganz/StyLua
           ref: ${{ steps.resolve.outputs.target }}
           path: stylua-src
 
       - name: Checkout Spider source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: SovereignSatellite/Spider
           ref: ${{ inputs.spider_ref }}

@@ -23,7 +23,7 @@ jobs:
       current: ${{ steps.decide.outputs.current }}
       should_build: ${{ steps.decide.outputs.should_build }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Resolve target version
         id: decide
@@ -63,10 +63,10 @@ jobs:
     if: needs.check.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Checkout StyLua source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: JohnnyMorganz/StyLua
           ref: ${{ needs.check.outputs.latest }}

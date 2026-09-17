@@ -1,13 +1,16 @@
-# StyLua for Roblox Studio
+<h1 align="center">
+  💅
+  <br>
+  StyLua for Roblox Studio
+</h1>
 
-[![Build WASM](https://github.com/morgann1/stylua-for-roblox/actions/workflows/build-wasm.yml/badge.svg)](https://github.com/morgann1/stylua-for-roblox/actions/workflows/build-wasm.yml)
-[![Release](https://github.com/morgann1/stylua-for-roblox/actions/workflows/release.yml/badge.svg)](https://github.com/morgann1/stylua-for-roblox/actions/workflows/release.yml)
-[![Latest release](https://img.shields.io/github/v/release/morgann1/stylua-for-roblox)](https://github.com/morgann1/stylua-for-roblox/releases/latest)
-[![License: MPL-2.0](https://img.shields.io/badge/license-MPL--2.0-blue)](LICENSE)
 
-<!-- LAST_CHECKED:START -->
-_Last checked against upstream: 2026-07-27 03:56 UTC (StyLua v2.5.2)_
-<!-- LAST_CHECKED:END -->
+<div align="center">
+
+  [![GitHub Releases](.github/assets/badges/link-github-releases.svg)](https://github.com/morgann1/studio-discover/releases)
+</div>
+
+StyLua as a Roblox Studio plugin, without any external programs.
 
 ## License
 

@@ -8,3 +8,7 @@
 <!-- LAST_CHECKED:START -->
 _Last checked against upstream: 2026-07-27 03:56 UTC (StyLua v2.5.2)_
 <!-- LAST_CHECKED:END -->
+
+## License
+
+Licensed under the [Mozilla Public License 2.0](LICENSE).
